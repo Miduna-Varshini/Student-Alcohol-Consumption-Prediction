@@ -2,13 +2,6 @@ import streamlit as st
 import pandas as pd
 import pickle
 
-# ---------------- LOAD MODEL ----------------
-with open("student_alcohol_model.pkl", "rb") as f:
-    model = pickle.load(f)
-
-with open("student_features.pkl", "rb") as f:
-    feature_columns = pickle.load(f)
-
 # ---------------- PAGE CONFIG ----------------
 st.set_page_config(
     page_title="Student Weekend Alcohol Predictor",
@@ -16,131 +9,141 @@ st.set_page_config(
     layout="wide"
 )
 
-# ---------------- CUSTOM CSS ----------------
+# ---------------- LOAD MODEL ----------------
+with open("student_alcohol_model.pkl", "rb") as f:
+    model = pickle.load(f)
+
+with open("student_features.pkl", "rb") as f:
+    feature_columns = pickle.load(f)
+
+# ---------------- CUSTOM CREATIVE THEME ----------------
 st.markdown("""
 <style>
 .stApp {
-    background: linear-gradient(135deg, #ffd1dc, #e6ccff);
+    background: linear-gradient(135deg, #fff1f2, #f3e8ff);
     color: #2c2c54;
 }
 
-/* Title */
 h1 {
-    color: #4b0082;
-    font-weight: bold;
+    color: #ff6159;
+    font-weight: 800;
 }
 
-/* Sidebar */
-section[data-testid="stSidebar"] {
-    background-color: #2c2c54;
+h3 {
+    color: #4b0082;
 }
-section[data-testid="stSidebar"] * {
-    color: white !important;
+
+/* Center card */
+.card {
+    background: white;
+    padding: 30px;
+    border-radius: 18px;
+    box-shadow: 0px 12px 30px rgba(0,0,0,0.08);
 }
 
 /* Button */
 div.stButton > button {
-    background-color: #ff69b4;
+    background: linear-gradient(90deg, #ff6159, #ff8c61);
     color: white;
     font-size: 16px;
-    border-radius: 12px;
-    padding: 10px 24px;
+    font-weight: 600;
+    border-radius: 14px;
+    padding: 12px 26px;
     border: none;
+}
+
+/* Metric box */
+.result-box {
+    padding: 24px;
+    border-radius: 16px;
+    color: white;
+    font-size: 18px;
+    margin-top: 15px;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# ---------------- TITLE ----------------
-st.title("🍷 Student Weekend Alcohol Consumption Predictor")
+# ---------------- HEADER ----------------
 st.markdown(
-    "Predict **weekend alcohol consumption (Walc)** using key student lifestyle and academic factors."
+    """
+    <h1 style='text-align:center;'>🍷 Student Weekend Alcohol Consumption Predictor</h1>
+    <p style='text-align:center;font-size:17px;'>Predict student weekend alcohol risk using lifestyle & academic factors</p>
+    <br>
+    """,
+    unsafe_allow_html=True
 )
 
-# ---------------- SIDEBAR INPUTS ----------------
-st.sidebar.header("Student Information")
+# ---------------- CENTER INPUT CARD ----------------
+col1, col2, col3 = st.columns([1, 2, 1])
 
-def user_input_features():
-    school = st.sidebar.selectbox("School", ["GP", "MS"])
-    sex = st.sidebar.selectbox("Sex", ["F", "M"])
-    age = st.sidebar.slider("Age", 15, 22, 17)
+with col2:
+    st.markdown("<div class='card'>", unsafe_allow_html=True)
+    st.markdown("### 🎛️ Student Information")
 
-    studytime = st.sidebar.slider("Weekly Study Time (1–4)", 1, 4, 2)
-    failures = st.sidebar.slider("Past Failures", 0, 3, 0)
+    school = st.selectbox("School", ["GP", "MS"])
+    sex = st.selectbox("Sex", ["F", "M"])
+    age = st.slider("Age", 15, 22, 17)
 
-    activities = st.sidebar.selectbox("Extracurricular Activities", ["yes", "no"])
-    higher = st.sidebar.selectbox("Wants Higher Education", ["yes", "no"])
+    studytime = st.slider("Weekly Study Time (1–4)", 1, 4, 2)
+    failures = st.slider("Past Failures", 0, 3, 0)
 
-    goout = st.sidebar.slider("Going Out with Friends (1–5)", 1, 5, 3)
-    Dalc = st.sidebar.slider("Workday Alcohol Consumption (1–5)", 1, 5, 1)
-    health = st.sidebar.slider("Health Status (1–5)", 1, 5, 3)
+    activities = st.selectbox("Extracurricular Activities", ["yes", "no"])
+    higher = st.selectbox("Wants Higher Education", ["yes", "no"])
 
-    absences = st.sidebar.slider("School Absences", 0, 93, 4)
-    G3 = st.sidebar.slider("Final Grade", 0, 20, 12)
+    goout = st.slider("Going Out with Friends (1–5)", 1, 5, 3)
+    Dalc = st.slider("Workday Alcohol Consumption (1–5)", 1, 5, 1)
+    health = st.slider("Health Status (1–5)", 1, 5, 3)
 
-    data = {
-        "school": school,
-        "sex": sex,
-        "age": age,
-        "studytime": studytime,
-        "failures": failures,
-        "activities": activities,
-        "higher": higher,
-        "goout": goout,
-        "Dalc": Dalc,
-        "health": health,
-        "absences": absences,
-        "G3": G3
-    }
+    absences = st.slider("School Absences", 0, 93, 4)
+    G3 = st.slider("Final Grade", 0, 20, 12)
 
-    return pd.DataFrame(data, index=[0])
+    predict_btn = st.button("🔮 Predict Weekend Alcohol Risk", use_container_width=True)
+    st.markdown("</div>", unsafe_allow_html=True)
 
-input_df = user_input_features()
+# ---------------- DATAFRAME & ENCODING ----------------
+input_df = pd.DataFrame({
+    "school": [school],
+    "sex": [sex],
+    "age": [age],
+    "studytime": [studytime],
+    "failures": [failures],
+    "activities": [activities],
+    "higher": [higher],
+    "goout": [goout],
+    "Dalc": [Dalc],
+    "health": [health],
+    "absences": [absences],
+    "G3": [G3]
+})
 
-# ---------------- ENCODING ----------------
 input_encoded = pd.get_dummies(input_df)
 input_encoded = input_encoded.reindex(columns=feature_columns, fill_value=0)
 
-# ---------------- PREDICTION & OUTPUT ----------------
-if st.button("Predict Walc"):
+# ---------------- PREDICTION RESULT ----------------
+if predict_btn:
     prediction = model.predict(input_encoded)[0]
     confidence = model.predict_proba(input_encoded).max()
 
-    # Risk level mapping
-    if prediction == 1:
+    if prediction <= 2:
         color = "#2ecc71"
-        level = "VERY LOW"
-        meaning = "Student shows minimal risk of weekend alcohol consumption."
-    elif prediction == 2:
-        color = "#7bed9f"
         level = "LOW"
-        meaning = "Student has a low level of alcohol consumption risk."
+        meaning = "Minimal risk of weekend alcohol consumption."
     elif prediction == 3:
         color = "#f1c40f"
         level = "MODERATE"
-        meaning = "Student shows a moderate risk and should be monitored."
-    elif prediction == 4:
-        color = "#e67e22"
-        level = "HIGH"
-        meaning = "Student shows high weekend alcohol consumption behavior."
+        meaning = "Moderate alcohol consumption risk."
     else:
         color = "#e74c3c"
-        level = "VERY HIGH"
-        meaning = "Student is at high risk of excessive weekend alcohol consumption."
+        level = "HIGH"
+        meaning = "High risk of excessive weekend alcohol consumption."
 
     st.markdown("## 🎯 Prediction Result")
-
     st.markdown(
         f"""
-        <div style="
-            background-color:{color};
-            padding:22px;
-            border-radius:14px;
-            color:white;
-            font-size:18px;
-        ">
+        <div class='result-box' style='background:{color};'>
             <b>Risk Level:</b> {level}<br>
-            <b>Walc Score:</b> {prediction}<br><br>
-            <b>Meaning:</b> {meaning}
+            <b>Predicted Walc Score:</b> {prediction}<br><br>
+            <b>Interpretation:</b> {meaning}
         </div>
         """,
         unsafe_allow_html=True
@@ -148,16 +151,18 @@ if st.button("Predict Walc"):
 
     st.markdown(
         f"""
-        <div style="
-            margin-top:15px;
-            background-color:#f3e8ff;
-            padding:14px;
-            border-radius:12px;
-            color:#4b0082;
-            font-size:16px;
-        ">
+        <div style='margin-top:12px;background:#fff3f0;padding:14px;border-radius:14px;'>
             <b>Prediction Confidence:</b> {confidence:.2f}
         </div>
         """,
         unsafe_allow_html=True
     )
+
+# ---------------- FOOTER ----------------
+st.markdown(
+    """
+    <hr>
+    <p style='text-align:center;font-size:14px;'>✨ ML-powered Student Risk Analysis | Streamlit App</p>
+    """,
+    unsafe_allow_html=True
+)
