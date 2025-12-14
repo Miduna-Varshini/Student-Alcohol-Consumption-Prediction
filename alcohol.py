@@ -20,8 +20,7 @@ with open("student_features.pkl", "rb") as f:
 st.markdown("""
 <style>
 .stApp {
-    background: linear-gradient(135deg, #fff1f2, #f3e8ff);
-    color: #2c2c54;
+    background-color:#53295B
 }
 
 h1 {
@@ -166,3 +165,4 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
