@@ -20,15 +20,32 @@ st.set_page_config(
 st.markdown("""
 <style>
 .stApp {
-    background: linear-gradient(to bottom right, #ffc0cb, #ffffff);
-    color: #00008b;
+    background: linear-gradient(135deg, #ffd1dc, #e6ccff);
+    color: #2c2c54;
 }
+
+/* Title */
+h1 {
+    color: #4b0082;
+    font-weight: bold;
+}
+
+/* Sidebar */
+section[data-testid="stSidebar"] {
+    background-color: #2c2c54;
+}
+section[data-testid="stSidebar"] * {
+    color: white !important;
+}
+
+/* Button */
 div.stButton > button {
     background-color: #ff69b4;
     color: white;
     font-size: 16px;
-    border-radius: 10px;
-    padding: 10px 20px;
+    border-radius: 12px;
+    padding: 10px 24px;
+    border: none;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -36,7 +53,7 @@ div.stButton > button {
 # ---------------- TITLE ----------------
 st.title("🍷 Student Weekend Alcohol Consumption Predictor")
 st.markdown(
-    "Predict **weekend alcohol consumption (Walc)** using a few important student factors."
+    "Predict **weekend alcohol consumption (Walc)** using key student lifestyle and academic factors."
 )
 
 # ---------------- SIDEBAR INPUTS ----------------
@@ -83,11 +100,64 @@ input_df = user_input_features()
 input_encoded = pd.get_dummies(input_df)
 input_encoded = input_encoded.reindex(columns=feature_columns, fill_value=0)
 
-# ---------------- PREDICTION ----------------
+# ---------------- PREDICTION & OUTPUT ----------------
 if st.button("Predict Walc"):
     prediction = model.predict(input_encoded)[0]
     confidence = model.predict_proba(input_encoded).max()
 
-    st.subheader("Prediction 🎯")
-    st.success(f"Predicted Weekend Alcohol Consumption (Walc): {prediction}")
-    st.info(f"Prediction Confidence: {confidence:.2f}")
+    # Risk level mapping
+    if prediction == 1:
+        color = "#2ecc71"
+        level = "VERY LOW"
+        meaning = "Student shows minimal risk of weekend alcohol consumption."
+    elif prediction == 2:
+        color = "#7bed9f"
+        level = "LOW"
+        meaning = "Student has a low level of alcohol consumption risk."
+    elif prediction == 3:
+        color = "#f1c40f"
+        level = "MODERATE"
+        meaning = "Student shows a moderate risk and should be monitored."
+    elif prediction == 4:
+        color = "#e67e22"
+        level = "HIGH"
+        meaning = "Student shows high weekend alcohol consumption behavior."
+    else:
+        color = "#e74c3c"
+        level = "VERY HIGH"
+        meaning = "Student is at high risk of excessive weekend alcohol consumption."
+
+    st.markdown("## 🎯 Prediction Result")
+
+    st.markdown(
+        f"""
+        <div style="
+            background-color:{color};
+            padding:22px;
+            border-radius:14px;
+            color:white;
+            font-size:18px;
+        ">
+            <b>Risk Level:</b> {level}<br>
+            <b>Walc Score:</b> {prediction}<br><br>
+            <b>Meaning:</b> {meaning}
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+        f"""
+        <div style="
+            margin-top:15px;
+            background-color:#f3e8ff;
+            padding:14px;
+            border-radius:12px;
+            color:#4b0082;
+            font-size:16px;
+        ">
+            <b>Prediction Confidence:</b> {confidence:.2f}
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
