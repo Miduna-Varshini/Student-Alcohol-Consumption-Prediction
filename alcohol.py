@@ -20,8 +20,7 @@ with open("student_features.pkl", "rb") as f:
 st.markdown("""
 <style>
 .stApp {
-    background-color:#0000FF; /* Blue background */
-    color: white;
+    background-color:#53295B;
     font-family: 'Arial', sans-serif;
 }
 
@@ -174,3 +173,4 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
