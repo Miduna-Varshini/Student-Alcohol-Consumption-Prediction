@@ -149,7 +149,7 @@ if predict_btn:
         f"""
         <div class='result-box' style='background:{color};'>
             <b>Risk Level:</b> {level}<br>
-            <b>Predicted Walc Score:</b> {prediction}<br><br>
+            <b>Predicted Value :</b> {prediction}<br><br>
             <b>Interpretation:</b> {meaning}
         </div>
         """,
@@ -173,4 +173,5 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
 
