@@ -16,28 +16,39 @@ with open("student_alcohol_model.pkl", "rb") as f:
 with open("student_features.pkl", "rb") as f:
     feature_columns = pickle.load(f)
 
-# ---------------- CUSTOM CREATIVE THEME ----------------
+# ---------------- CUSTOM THEME ----------------
 st.markdown("""
 <style>
 .stApp {
-    background-color:#53295B
+    background-color:#0000FF; /* Blue background */
+    color: white;
+    font-family: 'Arial', sans-serif;
 }
 
 h1 {
     color: #ff6159;
     font-weight: 800;
+    text-align: center;
 }
 
 h3 {
-    color: #4b0082;
+    color: #ffffff;
 }
 
-/* Center card */
+/* Center card - transparent */
 .card {
-    background: white;
+    background: transparent;
     padding: 30px;
     border-radius: 18px;
-    box-shadow: 0px 12px 30px rgba(0,0,0,0.08);
+    box-shadow: none;
+}
+
+/* Inputs */
+.stSlider > div > div > input {
+    color: black !important;
+}
+.stSelectbox > div > div > div {
+    color: black !important;
 }
 
 /* Button */
@@ -65,7 +76,7 @@ div.stButton > button {
 # ---------------- HEADER ----------------
 st.markdown(
     """
-    <h1 style='text-align:center;'>🍷 Student Weekend Alcohol Consumption Predictor</h1>
+    <h1>🍷 Student Weekend Alcohol Consumption Predictor</h1>
     <p style='text-align:center;font-size:17px;'>Predict student weekend alcohol risk using lifestyle & academic factors</p>
     <br>
     """,
@@ -79,20 +90,17 @@ with col2:
     st.markdown("<div class='card'>", unsafe_allow_html=True)
     st.markdown("### 🎛️ Student Information")
 
+    # Inputs
     school = st.selectbox("School", ["GP", "MS"])
     sex = st.selectbox("Sex", ["F", "M"])
     age = st.slider("Age", 15, 22, 17)
-
     studytime = st.slider("Weekly Study Time (1–4)", 1, 4, 2)
     failures = st.slider("Past Failures", 0, 3, 0)
-
     activities = st.selectbox("Extracurricular Activities", ["yes", "no"])
     higher = st.selectbox("Wants Higher Education", ["yes", "no"])
-
     goout = st.slider("Going Out with Friends (1–5)", 1, 5, 3)
     Dalc = st.slider("Workday Alcohol Consumption (1–5)", 1, 5, 1)
     health = st.slider("Health Status (1–5)", 1, 5, 3)
-
     absences = st.slider("School Absences", 0, 93, 4)
     G3 = st.slider("Final Grade", 0, 20, 12)
 
@@ -115,6 +123,7 @@ input_df = pd.DataFrame({
     "G3": [G3]
 })
 
+# Encode categorical variables
 input_encoded = pd.get_dummies(input_df)
 input_encoded = input_encoded.reindex(columns=feature_columns, fill_value=0)
 
@@ -150,7 +159,7 @@ if predict_btn:
 
     st.markdown(
         f"""
-        <div style='margin-top:12px;background:#fff3f0;padding:14px;border-radius:14px;'>
+        <div style='margin-top:12px;background:#fff3f0;padding:14px;border-radius:14px;color:black;'>
             <b>Prediction Confidence:</b> {confidence:.2f}
         </div>
         """,
@@ -161,8 +170,7 @@ if predict_btn:
 st.markdown(
     """
     <hr>
-    <p style='text-align:center;font-size:14px;'>✨ ML-powered Student Risk Analysis | Streamlit App</p>
+    <p style='text-align:center;font-size:14px;color:white;'>✨ ML-powered Student Risk Analysis | Streamlit App</p>
     """,
     unsafe_allow_html=True
 )
-
